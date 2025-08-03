@@ -1,4 +1,4 @@
 {
-  "rust-analyzer.checkOnSave": false,
-  "rust-analyzer.cargo.buildScripts.enable": false
+  // "rust-analyzer.checkOnSave": false,
+  // "rust-analyzer.cargo.buildScripts.enable": false
 }
