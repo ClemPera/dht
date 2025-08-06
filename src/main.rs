@@ -1,65 +1,99 @@
-use esp_idf_hal::peripheral::Peripheral;
 // use esp_idf_svc::hal::{gpio::{Level, Pull, OutputOpenDrain}, prelude::Peripherals, delay::Delay, clock::ClockControl};
 use esp_idf_hal::{gpio::*};
-use esp_idf_hal::{io, task::*};
+use esp_idf_hal::task::*;
 use esp_idf_hal::peripherals::Peripherals;
+use std::thread;
 use std::thread::sleep;
-use std::time::Duration;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 fn main()  -> anyhow::Result<()> {
-    // It is necessary to call this function once. Otherwise some patches to the runtime
-    // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
-    esp_idf_svc::sys::link_patches();
-
-    // Bind the log crate to the ESP Logging facilities
-    esp_idf_svc::log::EspLogger::initialize_default();
-
-    block_on(async {loop{
-        log::info!("Hello, world!");
-        dht().await;
-        sleep(Duration::from_secs(1000));
-    }})
+  // It is necessary to call this function once. Otherwise some patches to the runtime
+  // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
+  esp_idf_svc::sys::link_patches();
+  
+  // Bind the log crate to the ESP Logging facilities
+  esp_idf_svc::log::EspLogger::initialize_default();
+  
+  block_on(async {loop{
+    log::info!("Hello, world!");
+    dht().await;
+    sleep(Duration::from_secs(1000));
+  }})
 }
 
 async fn dht()
 {
-    let peripherals: Peripherals = Peripherals::take().unwrap();
-    let pins = peripherals.pins;
-    let mut sensor = PinDriver::input_output_od(pins.gpio21).unwrap();
-    sleep(Duration::from_secs(2));
-    log::info!("starting");
+  let peripherals: Peripherals = Peripherals::take().unwrap();
+  let pins = peripherals.pins;
+  let mut sensor = PinDriver::input_output_od(pins.gpio21).unwrap();
+  sleep(Duration::from_secs(1));
+  log::info!("starting");
+  
+  dht_start(&mut sensor);
+  dht_get(&mut sensor);
+  
+}
+
+fn dht_connect<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+  log::info!("Starting communication");
+
+  PinDriver::set_high(sensor).unwrap();
+  sleep(Duration::from_millis(100));
+
+  PinDriver::set_low(sensor).unwrap();
+
+  sleep(Duration::from_millis(30));
+
+  PinDriver::set_high(sensor).unwrap();
+}
+
+fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput>, level_meter: Level) -> Result<(), ()>{
+  let start = Instant::now();
+  
+  loop{
+    if PinDriver::get_level(sensor) == level_meter {
+      return Ok(());
+    } 
     
-    PinDriver::set_high(&mut sensor).unwrap();
-    sleep(Duration::from_millis(100));
-    let level = PinDriver::get_level(&mut sensor);
-    log::info!("0:{level:?}");
-    //start communication 
-    PinDriver::set_low(&mut sensor).unwrap();
-    let level = PinDriver::get_level(&mut sensor);
-    log::info!("1:{level:?}");
-    sleep(Duration::from_millis(30));
-    PinDriver::set_high(&mut sensor).unwrap();
-    let level = PinDriver::get_level(&mut sensor);
-    log::info!("2:{level:?}");
+    if start.elapsed() >= Duration::from_secs(1){
+      return Err(())
+    }
+
+    sleep(Duration::from_micros(3))
+  }
+}
+
+fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+  loop{
+    dht_connect(sensor);
     
-    //wait for the sensor to answer
-    PinDriver::wait_for_low(&mut sensor).await.unwrap();
-    // let level = PinDriver::get_level(&mut sensor);
-    // log::info!("3:{level:?}");
-    PinDriver::wait_for_high(&mut sensor).await.unwrap();
-    // let level = PinDriver::get_level(&mut sensor);
-    // log::info!("4:{level:?}");
+    match dht_get_level_until_timeout(sensor, Level::Low){
+      Ok(_) => {
+        match dht_get_level_until_timeout(sensor, Level::High){
+          Ok(_) => {    
+            //Putting that in a thread because it's slows the process and break the communication with the sensor
+            thread::spawn(||{log::info!("Sensor will send data soon\n<")});
+            
+            break;
+          },
+          Err(_) => {}
+        }
+      },
+      Err(_) => {}
+    };
     
-    // log::info!("Communication established");
-    PinDriver::wait_for_low(&mut sensor).await.unwrap();
-    // let level = PinDriver::get_level(&mut sensor);
-    // log::info!("5:{level:?}");
-    let start = Instant::now();
+    log::info!("Sensor hasn't aknowledge the communication, retrying...\n<");
+  }
+}
+
+fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+  loop{
+    // dht_get_level_until_timeout(sensor, Level::Low);
+    // let start = Instant::now(); //TODO: This isn't sync exactly because of sleep of a few micro in dht_get_level_until_timeout
     
-    PinDriver::wait_for_high(&mut sensor).await.unwrap();
-    // let level = PinDriver::get_level(&mut sensor);
-    // log::info!("6:{level:?}");
-    let stop = start.elapsed();
-    log::info!("elapsed: {stop:?}");
+    // dht_get_level_until_timeout(sensor, Level::High);
+
+    // let stop = start.elapsed();
+    // log::info!("elapsed: {stop:?}");
+  }
 }
