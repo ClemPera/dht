@@ -15,7 +15,7 @@ fn main()  -> anyhow::Result<()> {
   esp_idf_svc::log::EspLogger::initialize_default();
 
   log::info!("starting, attach debugger if needed");
-  sleep(Duration::from_secs(6));
+  sleep(Duration::from_secs(4));
   log::info!("started");
 
   block_on(async {loop{
@@ -50,6 +50,8 @@ fn dht_connect<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   PinDriver::set_high(sensor).unwrap();
 }
 
+
+//TODO: On pourrait peut être calculer et renvoyer le temps de lecture là dedans
 fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput>, level_meter: Level) -> Result<(), ()>{
   let start = Instant::now();
   
@@ -62,7 +64,8 @@ fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput
       return Err(())
     }
 
-    sleep(Duration::from_micros(3))
+    //TODO: See if we can't put a sleep here (keep in mind that it takes the time between level to show data so maybe not?)
+    // sleep(Duration::from_micros(3))
   }
 }
 
@@ -74,10 +77,14 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
       Ok(_) => {
         match dht_get_level_until_timeout(sensor, Level::High){
           Ok(_) => {    
-            //Putting that in a thread because it's slows the process and break the communication with the sensor
-            thread::spawn(||{log::info!("Sensor will send data soon\n<")});
-            
-            break;
+            match dht_get_level_until_timeout(sensor, Level::Low){
+              Ok(_) => {
+                //Putting that in a thread because otherwise it's slows the process and break the communication with the sensor
+                
+                break;
+              },
+              Err(_) => {}
+            }
           },
           Err(_) => {}
         }
@@ -90,13 +97,41 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
 }
 
 fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+  let mut bit: u8 = 0;
+  let mut bits: Vec<u8> = Vec::new();
+  
   loop{
-    // dht_get_level_until_timeout(sensor, Level::Low);
-    // let start = Instant::now(); //TODO: This isn't sync exactly because of sleep of a few micro in dht_get_level_until_timeout
-    
-    // dht_get_level_until_timeout(sensor, Level::High);
+    //Wait for timeout between bits is finshed
+    match dht_get_level_until_timeout(sensor, Level::High){
+      Ok(_) => {}
+      Err(_) => {
+        log::error!("Timeout between bits for bit n°{bit:?} has been too long");
+        break;
+      }
+    };
 
-    // let stop = start.elapsed();
-    // log::info!("elapsed: {stop:?}");
+    //Start reading bit
+    let start = Instant::now(); 
+    match dht_get_level_until_timeout(sensor, Level::Low){
+      Ok(_) => {
+        let stop = start.elapsed().as_micros();
+        if stop <= 37{
+          //0
+          bits.push(0);
+        }
+        else {
+          //1
+          bits.push(1);
+        }
+      }
+      Err(_) => {
+        log::error!("Timeout for reading bit n°{bit:?} has been too long");
+        break;
+      }
+    };
+
+    bit = bit+1;
   }
+
+  log::info!("bits are {bits:?}");
 }
