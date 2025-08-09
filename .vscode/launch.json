@@ -1,18 +1,48 @@
-// {
-//   "version": "0.2.0",
-//   "configurations": [
-//     {
-//       "type": "probe-rs-debug",
-//       "request": "attach",  // Use attach instead of launch
-//       "name": "Attach to ESP32-S3",
-//       "cwd": "${workspaceFolder}",
-//       "chip": "esp32s3",
-//       "coreConfigs": [
-//         {
-//           "coreIndex": 0,
-//           "programBinary": "target/xtensa-esp32s3-espidf/debug/${workspaceFolderBasename}"
-//         }
-//       ]
-//     }
-//   ]
-// }
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flash + Debug",
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "preLaunchTask": "Flash ESP32-S3",
+      "cwd": "${workspaceFolder}",
+      "chip": "esp32s3",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "target/xtensa-esp32s3-espidf/debug/first-esp"
+        }
+      ],
+      "env": {
+        "RUST_LOG": "info"
+      },
+      "consoleLogLevel": "Console"
+    },
+    {
+      "type": "probe-rs-debug",
+      "request": "attach",
+      "name": "Attach to ESP32-S3",
+      "cwd": "${workspaceFolder}",
+      "chip": "esp32s3",
+      "coreConfigs": [
+        {
+          "coreIndex": 0,
+          "programBinary": "target/xtensa-esp32s3-espidf/debug/first-esp"
+        }
+      ],
+      "env": {
+        "RUST_LOG": "info"
+      },
+      "consoleLogLevel": "Console"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Flash and Debug ESP32-S3",
+      "configurations": ["Flash + Debug"],
+      "preLaunchTask": "Flash ESP32-S3",
+      "stopAll": true
+    }
+  ]
+}

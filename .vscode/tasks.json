@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build project",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["build"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash ESP32-S3",
+      "type": "shell",
+      "command": "/home/clement/.cargo/bin/espflash",
+      "args": ["flash", "target/xtensa-esp32s3-espidf/debug/first-esp"],
+    //   "args": ["flash", "--monitor", "target/xtensa-esp32s3-espidf/debug/first-esp"],
+      "group": "build",      
+      "dependsOn": "Build project",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
