@@ -13,7 +13,11 @@ fn main()  -> anyhow::Result<()> {
   
   // Bind the log crate to the ESP Logging facilities
   esp_idf_svc::log::EspLogger::initialize_default();
-  
+
+  log::info!("starting, attach debugger if needed");
+  sleep(Duration::from_secs(6));
+  log::info!("started");
+
   block_on(async {loop{
     log::info!("Hello, world!");
     dht().await;
@@ -27,7 +31,6 @@ async fn dht()
   let pins = peripherals.pins;
   let mut sensor = PinDriver::input_output_od(pins.gpio21).unwrap();
   sleep(Duration::from_secs(1));
-  log::info!("starting");
   
   dht_start(&mut sensor);
   dht_get(&mut sensor);

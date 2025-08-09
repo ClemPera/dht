@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flash + Debug",
+      "name": "Build + Flash + Debug",
       "type": "probe-rs-debug",
       "request": "attach",
       "preLaunchTask": "Flash ESP32-S3",
@@ -40,7 +40,7 @@
   "compounds": [
     {
       "name": "Flash and Debug ESP32-S3",
-      "configurations": ["Flash + Debug"],
+      "configurations": ["Build + Flash + Debug"],
       "preLaunchTask": "Flash ESP32-S3",
       "stopAll": true
     }
