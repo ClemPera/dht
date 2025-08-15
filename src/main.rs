@@ -21,7 +21,7 @@ fn main()  -> anyhow::Result<()> {
   block_on(async {loop{
     log::info!("Hello, world!");
     dht().await;
-    sleep(Duration::from_secs(1000));
+    sleep(Duration::from_secs(5));
   }})
 }
 
@@ -50,7 +50,6 @@ fn dht_connect<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   PinDriver::set_high(sensor).unwrap();
 }
 
-
 //TODO: On pourrait peut être calculer et renvoyer le temps de lecture là dedans
 fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput>, level_meter: Level) -> Result<(), ()>{
   let start = Instant::now();
@@ -64,7 +63,7 @@ fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput
       return Err(())
     }
 
-    //TODO: See if we can't put a sleep here (keep in mind that it takes the time between level to show data so maybe not?)
+    //TODO: See if we can't put a sleep here (keep in mind that it takes the time between level to show data so maybe not? (nanosec could be fine))
     // sleep(Duration::from_micros(3))
   }
 }
@@ -72,6 +71,8 @@ fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput
 fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   loop{
     dht_connect(sensor);
+    let mut bit: u8 = 0;
+    let mut bits: Vec<u8> = Vec::new();
     
     match dht_get_level_until_timeout(sensor, Level::Low){
       Ok(_) => {
@@ -79,26 +80,6 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
           Ok(_) => {    
             match dht_get_level_until_timeout(sensor, Level::Low){
               Ok(_) => {
-                //Putting that in a thread because otherwise it's slows the process and break the communication with the sensor
-                
-                break;
-              },
-              Err(_) => {}
-            }
-          },
-          Err(_) => {}
-        }
-      },
-      Err(_) => {}
-    };
-    
-    log::info!("Sensor hasn't aknowledge the communication, retrying...\n<");
-  }
-}
-
-fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
-  let mut bit: u8 = 0;
-  let mut bits: Vec<u8> = Vec::new();
   
   loop{
     //Wait for timeout between bits is finshed
@@ -116,16 +97,15 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
       Ok(_) => {
         let stop = start.elapsed().as_micros();
         if stop <= 37{
-          //0
           bits.push(0);
         }
         else {
-          //1
           bits.push(1);
         }
       }
       Err(_) => {
         log::error!("Timeout for reading bit n°{bit:?} has been too long");
+
         break;
       }
     };
@@ -134,4 +114,22 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   }
 
   log::info!("bits are {bits:?}");
+          bit = 0;
+        bits = Vec::new();
+              },
+              Err(_) => {}
+            }
+          },
+          Err(_) => {}
+        }
+      },
+      Err(_) => {}
+    };
+    
+    log::info!("Sensor hasn't aknowledge the communication, retrying...\n<");
+  }
+}
+
+fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+
 }
