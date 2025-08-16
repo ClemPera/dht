@@ -1,3 +1,5 @@
 fn main() {
-    embuild::espidf::sysenv::output();
+    #[cfg(target_arch = "xtensa")]{
+        embuild::espidf::sysenv::output();
+    }
 }

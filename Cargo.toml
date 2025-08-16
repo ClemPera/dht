@@ -22,7 +22,8 @@ default = []
 
 experimental = ["esp-idf-svc/experimental"]
 
-[dependencies]
+# [dependencies]
+[target.'cfg(target_arch = "xtensa")'.dependencies]
 log = "0.4"
 esp-idf-svc = "0.51"
 esp-idf-hal = "0.45"

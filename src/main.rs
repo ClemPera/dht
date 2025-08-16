@@ -2,9 +2,9 @@
 use esp_idf_hal::{gpio::*};
 use esp_idf_hal::task::*;
 use esp_idf_hal::peripherals::Peripherals;
-use std::thread;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+use first_esp::*;
 
 fn main()  -> anyhow::Result<()> {
   // It is necessary to call this function once. Otherwise some patches to the runtime
@@ -123,7 +123,7 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
         }
       }
       Err(_) => {
-        log::error!("Timeout for reading bit n°{bit:?} has been too long");
+        // log::error!("Timeout for reading bit n°{bit:?} has been too long");
         
         break;
       }
@@ -131,7 +131,26 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
     
     bit = bit+1;
   }
+
+  let _ = dht_check(bits);
+  // dht_human();
   
   //This logs cause issues for some reason, please don't use
   // log::info!("bits are {bits:?}");
+}
+
+//TODO: unit test (+move to lib.rs)
+fn dht_check(bits: Vec<u8>) -> Result<(),()>{
+  let len =  bits.len();
+  if len == 40 {
+    // Convert bits to bytes
+
+    bit_to_bytes(bits);
+
+    //TODO: Checksum
+    
+    return Ok(())
+  }else{
+    return Err(())
+  }
 }
