@@ -13,11 +13,11 @@ fn main()  -> anyhow::Result<()> {
   
   // Bind the log crate to the ESP Logging facilities
   esp_idf_svc::log::EspLogger::initialize_default();
-
+  
   log::info!("starting, attach debugger if needed");
   sleep(Duration::from_secs(4));
   log::info!("started");
-
+  
   block_on(async {loop{
     log::info!("Hello, world!");
     dht().await;
@@ -32,21 +32,22 @@ async fn dht()
   let mut sensor = PinDriver::input_output_od(pins.gpio21).unwrap();
   sleep(Duration::from_secs(1));
   
-  dht_start(&mut sensor);
-  dht_get(&mut sensor);
-  
+  loop{
+    dht_start(&mut sensor);
+    // dht_get(&mut sensor);
+  }
 }
 
 fn dht_connect<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   log::info!("Starting communication");
-
+  
   PinDriver::set_high(sensor).unwrap();
   sleep(Duration::from_millis(100));
-
+  
   PinDriver::set_low(sensor).unwrap();
-
+  
   sleep(Duration::from_millis(30));
-
+  
   PinDriver::set_high(sensor).unwrap();
 }
 
@@ -62,7 +63,7 @@ fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput
     if start.elapsed() >= Duration::from_secs(1){
       return Err(())
     }
-
+    
     //TODO: See if we can't put a sleep here (keep in mind that it takes the time between level to show data so maybe not? (nanosec could be fine))
     // sleep(Duration::from_micros(3))
   }
@@ -71,8 +72,6 @@ fn dht_get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput
 fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   loop{
     dht_connect(sensor);
-    let mut bit: u8 = 0;
-    let mut bits: Vec<u8> = Vec::new();
     
     match dht_get_level_until_timeout(sensor, Level::Low){
       Ok(_) => {
@@ -80,42 +79,7 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
           Ok(_) => {    
             match dht_get_level_until_timeout(sensor, Level::Low){
               Ok(_) => {
-  
-  loop{
-    //Wait for timeout between bits is finshed
-    match dht_get_level_until_timeout(sensor, Level::High){
-      Ok(_) => {}
-      Err(_) => {
-        log::error!("Timeout between bits for bit n°{bit:?} has been too long");
-        break;
-      }
-    };
-
-    //Start reading bit
-    let start = Instant::now(); 
-    match dht_get_level_until_timeout(sensor, Level::Low){
-      Ok(_) => {
-        let stop = start.elapsed().as_micros();
-        if stop <= 37{
-          bits.push(0);
-        }
-        else {
-          bits.push(1);
-        }
-      }
-      Err(_) => {
-        log::error!("Timeout for reading bit n°{bit:?} has been too long");
-
-        break;
-      }
-    };
-
-    bit = bit+1;
-  }
-
-  log::info!("bits are {bits:?}");
-          bit = 0;
-        bits = Vec::new();
+                dht_get(sensor);
               },
               Err(_) => {}
             }
@@ -131,5 +95,44 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
 }
 
 fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+  let mut bit: u8 = 0;
+  let mut bits: Vec<u8> = Vec::new();
 
+  loop{
+    //Wait for timeout between bits is finshed
+    match dht_get_level_until_timeout(sensor, Level::High){
+      Ok(_) => {}
+      Err(_) => {
+        log::error!("Timeout between bits for bit n°{bit:?} has been too long");
+        break;
+      }
+    };
+    
+    //Start reading bit
+    let start = Instant::now(); 
+    match dht_get_level_until_timeout(sensor, Level::Low){
+      Ok(_) => {
+        let stop = start.elapsed().as_micros();
+        if stop <= 37{
+          bits.push(0);
+        }
+        else {
+          bits.push(1);
+        }
+      }
+      Err(_) => {
+        log::error!("Timeout for reading bit n°{bit:?} has been too long");
+        
+        break;
+      }
+    };
+    
+    bit = bit+1;
+  }
+  
+  log::info!("bits are {bits:?}");
+  // bit = 0;
+  // bits = Vec::new();
+  
+  sleep(Duration::from_secs(7));
 }
