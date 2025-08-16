@@ -90,7 +90,9 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
       Err(_) => {}
     };
     
-    log::info!("Sensor hasn't aknowledge the communication, retrying...\n<");
+    // log::info!("Sensor hasn't aknowledge the communication, retrying...\n<");
+
+    sleep(Duration::from_secs(5));
   }
 }
 
@@ -130,9 +132,6 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
     bit = bit+1;
   }
   
-  log::info!("bits are {bits:?}");
-  // bit = 0;
-  // bits = Vec::new();
-  
-  sleep(Duration::from_secs(7));
+  //This logs cause issues for some reason, please don't use
+  // log::info!("bits are {bits:?}");
 }
