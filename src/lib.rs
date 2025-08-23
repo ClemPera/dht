@@ -26,9 +26,9 @@ pub fn checksum(bytes: [u8; 5]) -> Result<(), ()> {
   total = total - (bytes[4] as u16);
 
   if total == (bytes[4] as u16){
-    return Ok(())
+    Ok(())
   }else{
-    return Err(())
+    Err(())
   }
 }
 
