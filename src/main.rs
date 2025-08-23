@@ -73,22 +73,13 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   loop{
     dht_connect(sensor);
     
-    match dht_get_level_until_timeout(sensor, Level::Low){
-      Ok(_) => {
-        match dht_get_level_until_timeout(sensor, Level::High){
-          Ok(_) => {    
-            match dht_get_level_until_timeout(sensor, Level::Low){
-              Ok(_) => {
-                dht_get(sensor);
-              },
-              Err(_) => {}
-            }
-          },
-          Err(_) => {}
+    if dht_get_level_until_timeout(sensor, Level::Low).is_ok() {
+      if dht_get_level_until_timeout(sensor, Level::High).is_ok() {
+        if dht_get_level_until_timeout(sensor, Level::Low).is_ok(){
+          dht_get(sensor);
         }
-      },
-      Err(_) => {}
-    };
+      }
+    }
     
     // log::info!("Sensor hasn't aknowledge the communication, retrying...\n<");
 
@@ -102,13 +93,10 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
 
   loop{
     //Wait for timeout between bits is finshed
-    match dht_get_level_until_timeout(sensor, Level::High){
-      Ok(_) => {}
-      Err(_) => {
-        log::error!("Timeout between bits for bit n°{bit:?} has been too long");
-        break;
-      }
-    };
+    if dht_get_level_until_timeout(sensor, Level::High).is_err() {
+      log::error!("Timeout between bits for bit n°{bit:?} has been too long");
+      break;
+    }
     
     //Start reading bit
     let start = Instant::now(); 
@@ -139,19 +127,12 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   // log::info!("bits are {bits:?}");
 }
 
-//TODO: unit test (+move to lib.rs)
 fn dht_check(bits: Vec<u8>) -> Result<(),()>{
   let len =  bits.len();
   if len == 40 {
-    // Convert bits to bytes
-
     let bytes = bit_to_bytes(bits);
 
-    checksum(bytes);
-
-    //TODO: Checksum
-    
-    return Ok(())
+    return checksum(bytes)
   }else{
     return Err(())
   }

@@ -1,3 +1,4 @@
+//Converts bits received to bytes
 pub fn bit_to_bytes(bits: Vec<u8>) -> [u8; 5] {
   let mut bytes = [0u8; 5];
   bits.iter()
@@ -12,6 +13,7 @@ pub fn bit_to_bytes(bits: Vec<u8>) -> [u8; 5] {
   bytes
 }
 
+//Checksum is passed
 pub fn checksum(bytes: [u8; 5]) -> Result<(), ()> {
   let mut total  = 0;
 
