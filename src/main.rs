@@ -145,7 +145,9 @@ fn dht_check(bits: Vec<u8>) -> Result<(),()>{
   if len == 40 {
     // Convert bits to bytes
 
-    bit_to_bytes(bits);
+    let bytes = bit_to_bytes(bits);
+
+    checksum(bytes);
 
     //TODO: Checksum
     
