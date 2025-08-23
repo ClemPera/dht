@@ -1,5 +1,13 @@
 fn main() {
-    #[cfg(target_arch = "xtensa")]{
-        embuild::espidf::sysenv::output();
-    }
+    setup_esp();
+}
+
+#[cfg(feature = "esp-build")]
+fn setup_esp() {
+    embuild::espidf::sysenv::output();
+}
+
+#[cfg(not(feature = "esp-build"))]
+fn setup_esp() {
+    // Do nothing
 }
