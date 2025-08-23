@@ -19,7 +19,6 @@ fn main()  -> anyhow::Result<()> {
   log::info!("started");
   
   block_on(async {loop{
-    log::info!("Hello, world!");
     dht().await;
     sleep(Duration::from_secs(5));
   }})
@@ -116,8 +115,6 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) -> Result<[f32; 
         }
       }
       Err(_) => {
-        log::error!("Timeout for reading bit n°{bit:?} has been too long");
-        
         break;
       }
     };
@@ -131,14 +128,15 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) -> Result<[f32; 
   }
 }
 
-fn dht_check(bits: Vec<u8>) -> Result<[u8; 5],()>{
+fn dht_check(bits: Vec<u8>) -> Result<[u8; 5], ()>{
   if bits.len() != 40 {
     return Err(())
   }
 
-  let bytes = bit_to_bytes(bits);
+  let bytes = bits_to_bytes(bits.clone());
 
   if checksum(bytes).is_err(){
+    log::error!("checksum didn't pass :( {bytes:?}. here's bits: {bits:?}");
     return Err(());
   }
 

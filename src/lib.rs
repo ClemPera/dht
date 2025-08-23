@@ -1,12 +1,13 @@
-pub fn bit_to_bytes(bits: Vec<u8>) -> [u8; 5] {
-  //! Converts bits received to bytes
+pub fn bits_to_bytes(bits: Vec<u8>) -> [u8; 5] {
+  //! Converts bits to bytes (MSB)
   let mut bytes = [0u8; 5];
 
   bits.iter()
   .enumerate()
   .for_each(|(i, x)| {
     let byte_index = i / 8;
-    let bit_position = i % 8;
+    let bit_position = 7 - (i % 8); //Flip to MSB
+
     if byte_index < bytes.len() {
       bytes[byte_index] |= x << bit_position;
     }
@@ -17,15 +18,14 @@ pub fn bit_to_bytes(bits: Vec<u8>) -> [u8; 5] {
 
 pub fn checksum(bytes: [u8; 5]) -> Result<(), ()> {
   //! Is checksum passed
-  let mut total  = 0;
+  let mut total: u16 = 0;
 
-  bytes.iter()
-    .for_each(|x| {total = total + x});
+  bytes.iter().for_each(|x| {total = total + *x as u16;});
 
   //Remove the checksum value from checksum total
-  total = total - bytes[4];
+  total = total - (bytes[4] as u16);
 
-  if total == bytes[4]{
+  if total == (bytes[4] as u16){
     return Ok(())
   }else{
     return Err(())
@@ -47,12 +47,12 @@ mod tests {
   #[test]
   fn test_bit_convert() {
     let bits = [0,0,0,0,1,1,1,1,
-    0,0,0,0,1,1,1,1,
-    0,0,0,0,1,1,1,1,
-    0,0,0,0,1,1,1,1,
-    0,0,0,0,1,1,1,1];
+                1,0,0,0,1,1,1,1,
+                1,1,1,1,0,0,0,0,
+                0,0,0,0,0,0,0,0,
+                1,1,1,1,1,1,1,1];
 
-    assert_eq!(bit_to_bytes(bits.to_vec()), [240, 240, 240, 240, 240]);
+    assert_eq!(bits_to_bytes(bits.to_vec()), [15, 143, 240, 0, 255]);
   }
   
   #[test]
