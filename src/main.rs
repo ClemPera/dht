@@ -76,7 +76,12 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
     if dht_get_level_until_timeout(sensor, Level::Low).is_ok() {
       if dht_get_level_until_timeout(sensor, Level::High).is_ok() {
         if dht_get_level_until_timeout(sensor, Level::Low).is_ok(){
-          dht_get(sensor);
+          match dht_get(sensor){
+            Ok(vals) => {
+              log::info!("vals read correctly: {vals:?}")
+            }
+            Err(_) => {}
+          }
         }
       }
     }
@@ -87,7 +92,7 @@ fn dht_start<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
   }
 }
 
-fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
+fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) -> Result<[f32; 2], ()>{
   let mut bit: u8 = 0;
   let mut bits: Vec<u8> = Vec::new();
 
@@ -111,7 +116,7 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
         }
       }
       Err(_) => {
-        // log::error!("Timeout for reading bit n°{bit:?} has been too long");
+        log::error!("Timeout for reading bit n°{bit:?} has been too long");
         
         break;
       }
@@ -120,20 +125,22 @@ fn dht_get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>){
     bit = bit+1;
   }
 
-  let _ = dht_check(bits);
-  // dht_human();
-  
-  //This logs cause issues for some reason, please don't use
-  // log::info!("bits are {bits:?}");
+  match dht_check(bits){
+    Ok(bytes) => { return Ok(convert_to_decimal(bytes)); }
+    Err(_) => { return Err(()); }
+  }
 }
 
-fn dht_check(bits: Vec<u8>) -> Result<(),()>{
-  let len =  bits.len();
-  if len == 40 {
-    let bytes = bit_to_bytes(bits);
-
-    return checksum(bytes)
-  }else{
+fn dht_check(bits: Vec<u8>) -> Result<[u8; 5],()>{
+  if bits.len() != 40 {
     return Err(())
   }
+
+  let bytes = bit_to_bytes(bits);
+
+  if checksum(bytes).is_err(){
+    return Err(());
+  }
+
+  Ok(bytes)
 }
