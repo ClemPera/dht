@@ -1,6 +1,8 @@
 # DHT
 It's (going to be) a crate that handle the reading of data of a DHT11/22 (temperature/humidity sensor) using `esp_idf_hal` on a esp32
 
+[![Continuous Integration](https://github.com/ClemPera/dht/actions/workflows/rust_ci.yml/badge.svg)](https://github.com/ClemPera/dht/actions/workflows/rust_ci.yml)
+
 ## How to use
 
 Here's a sample code:
@@ -46,4 +48,4 @@ fn main()  -> anyhow::Result<()> {
 - Use `Attach to ESP32-S3` run the debugger the moment the flash finish
 
 ## How to run unit test
-- Run unit tests with `cargo test --lib --no-default-features --target x86_64-unknown-linux-gnu`
+- Run unit tests with `rustc --test src/utils.rs -o utils_test && ./utils_test`
