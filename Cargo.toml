@@ -13,6 +13,9 @@ categories = ["embedded"]
 keywords = ["esp", "esp32", "dht", "dht11", "dht22"]
 license-file = "LICENSE"
 readme = "README.md"
+exclude = [
+    ".embuild/"
+]
 
 # [[bin]]
 # name = "esp-idf-dht"
