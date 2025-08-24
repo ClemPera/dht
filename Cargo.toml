@@ -3,8 +3,16 @@ name = "esp-idf-dht"
 version = "0.1.0"
 authors = ["clemPera <clement.pera@protonmail.com>"]
 edition = "2021"
+repository = "https://github.com/ClemPera/esp-idf-dht"
+homepage = "https://github.com/ClemPera/esp-idf-dht"
+documentation = "https://docs.rs/esp-idf-dht/latest/esp-idf-dht"
+description = "Read values from DHT11/DHT22 temperature and humidity sensors using esp-idf"
 resolver = "2"
 rust-version = "1.77"
+categories = ["embedded"]
+keywords = ["esp", "esp32", "dht", "dht11", "dht22"]
+license-file = "LICENSE"
+readme = "README.md"
 
 # [[bin]]
 # name = "esp-idf-dht"
