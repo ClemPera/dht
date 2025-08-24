@@ -44,5 +44,5 @@ jobs:
       - name: Enable caching
         uses: Swatinem/rust-cache@v2
       - name: Run command
-        run: rustc --test src/utils.rs -o utils_test && ./utils_testrm utils_test
+        run: rustc --test src/utils.rs -o utils_test && ./utils_test
         # run: cargo ${{ matrix.action.command }} ${{ matrix.action.args }}
