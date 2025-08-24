@@ -1,14 +1,14 @@
 [package]
-name = "first-esp"
+name = "esp-idf-dht"
 version = "0.1.0"
-authors = ["clemPera <clement.pera@gmail.com>"]
+authors = ["clemPera <clement.pera@protonmail.com>"]
 edition = "2021"
 resolver = "2"
 rust-version = "1.77"
 
-[[bin]]
-name = "first-esp"
-harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+# [[bin]]
+# name = "esp-idf-dht"
+# harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
 
 [profile.release]
 opt-level = "s"
@@ -21,14 +21,14 @@ opt-level = "z"
 default = ["esp-build"]
 esp-build = []
 
-experimental = ["esp-idf-svc/experimental"]
+# experimental = ["esp-idf-svc/experimental"]
 
 # [dependencies]
 [target.'cfg(target_arch = "xtensa")'.dependencies]
-log = "0.4"
-esp-idf-svc = "0.51"
-esp-idf-hal = "0.45"
-anyhow = "1.0.98"
+# log = "0.4"
+# esp-idf-svc = "0.51"
+esp-idf-hal = "^0.45"
+anyhow = "^1.0.98"
 
 # --- Optional Embassy Integration ---
 # esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }

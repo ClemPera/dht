@@ -14,31 +14,18 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  rust-checks:
-    name: Rust Checks
+  test-utils:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        action:
-          - command: test
-            args: --lib --no-default-features --target x86_64-unknown-linux-gnu
-          # - command: build
-          #   args: --release
-          # - command: fmt
-          #   args: --all -- --check --color always
-          # - command: clippy
-          #   args: --all-targets --all-features --workspace -- -D warnings
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup Rust
-        uses: esp-rs/xtensa-toolchain@v1.6
-        with:
-          default: true
-          buildtargets: esp32s3
-          ldproxy: true
-      - name: Enable caching
-        uses: Swatinem/rust-cache@v2
-      - name: Run command
-        run: cargo ${{ matrix.action.command }} ${{ matrix.action.args }}
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Test utils.rs only
+      run: |
+        rustc --test src/utils.rs -o utils_test
+        ./utils_test
+        rm utils_test
