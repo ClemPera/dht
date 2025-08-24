@@ -1,6 +1,6 @@
 # DHT
 <!-- [![Continuous Integration](https://github.com/ClemPera/dht/actions/workflows/rust_ci.yml/badge.svg)](https://github.com/ClemPera/dht/actions/workflows/rust_ci.yml) -->
-[<img alt="github" src="https://img.shields.io/badge/github-dtolnay/esp-idf-dht-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/ClemPera/esp-idf-dht)
+[<img alt="github" src="https://img.shields.io/badge/github-ClemPera/esp-idf-dht-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="20">](https://github.com/ClemPera/esp-idf-dht)
 [<img alt="crates.io" src="https://img.shields.io/crates/v/esp-idf-dht.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/esp-idf-dht)
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-esp-idf-dht-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/esp-idf-dht)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/ClemPera/esp-idf-dht/rust_ci.yml?branch=main&style=for-the-badge" height="20">](https://github.com/ClemPera/esp-idf-dht/actions?query=branch%main)
@@ -13,6 +13,7 @@ It's a crate that handle the reading of data of a DHT11/22 (temperature/humidity
 [dependencies]
 esp-idf-dht = "1.0"
 ```
+
 
 Here's a sample code:
 
