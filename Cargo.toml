@@ -1,6 +1,6 @@
 [package]
 name = "esp-idf-dht"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["clemPera <clement.pera@protonmail.com>"]
 edition = "2021"
 repository = "https://github.com/ClemPera/esp-idf-dht"
