@@ -1,6 +1,6 @@
 [package]
 name = "esp-idf-dht"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["clemPera <clement.pera@protonmail.com>"]
 edition = "2021"
 repository = "https://github.com/ClemPera/esp-idf-dht"
@@ -27,8 +27,8 @@ opt-level = "z"
 
 # experimental = ["esp-idf-svc/experimental"]
 
-# [dependencies]
-[target.'cfg(target_arch = "xtensa")'.dependencies]
+[dependencies]
+# [target.'cfg(target_arch = "xtensa")'.dependencies]
 # log = "0.4"
 # esp-idf-svc = "0.51"
 esp-idf-hal = "^0.45"
