@@ -11,7 +11,7 @@ resolver = "2"
 rust-version = "1.77"
 categories = ["embedded"]
 keywords = ["esp", "esp32", "dht", "dht11", "dht22"]
-license-file = "LICENSE"
+license = "AGPL-3.0"
 readme = "README.md"
 
 # [[bin]]
