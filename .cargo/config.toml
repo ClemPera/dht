@@ -1,11 +1,11 @@
 [build]
 target = "riscv32imc-esp-espidf"
 
-# [target.xtensa-esp32s3-espidf]
-# linker = "ldproxy"
-# # runner = "espflash flash --monitor"
-# runner = "probe-rs run --chip esp32s3" #for debug
-# rustflags = [ "--cfg",  "espidf_time64"]
+[target.xtensa-esp32s3-espidf]
+linker = "ldproxy"
+# runner = "espflash flash --monitor"
+runner = "probe-rs run --chip esp32s3" #for debug
+rustflags = [ "--cfg",  "espidf_time64"]
 
 [unstable]
 build-std = ["std", "panic_abort"]
