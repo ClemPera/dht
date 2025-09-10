@@ -1,21 +1,12 @@
 use esp_idf_hal::{gpio::*};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
-use crate::utils;
+use crate::utils::{self, DhtData};
 
 static NUMBER_OF_TRY_BEFORE_ERROR: u8 = 10;
 
-// pub async fn dht() -> Result<[f32; 2], &'static str> {
-//   let peripherals: Peripherals = Peripherals::take().unwrap();
-//   let pins = peripherals.pins;
-//   let mut sensor = PinDriver::input_output_od(pins.gpio21).unwrap();
-//   sleep(Duration::from_secs(1));
-  
-//   read(&mut sensor).await
-// }
-
 pub fn read<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) 
-    -> Result<[f32; 2], String>{
+    -> Result<DhtData, String>{
   //! Read the value of the sensor
   let mut tries: u8 = 0;
 
@@ -74,9 +65,8 @@ fn get_level_until_timeout<T: Pin>(sensor: &mut PinDriver<'_, T, InputOutput>, l
   }
 }
 
-
-fn get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) -> Result<[f32; 2], String>{
-  //!Return the [Humidity value, Temperature value] read by the sensor
+fn get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) -> Result<DhtData, String>{
+  //!Return the Data struct of temperature and humidity read by the sensor
   let mut bits: Vec<u8> = Vec::new();
 
   loop{
@@ -101,7 +91,7 @@ fn get<T: Pin> (sensor: &mut PinDriver<'_, T, InputOutput>) -> Result<[f32; 2], 
   }
 
   match check(bits){
-    Ok(bytes) => { Ok(utils::convert_to_decimal(bytes)) }
+    Ok(bytes) => { Ok(utils::convert_to_data_struct(bytes)) }
     Err(error) => { return Err(error) }
   }
 }
